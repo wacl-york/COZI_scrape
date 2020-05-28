@@ -1,0 +1,10 @@
+{
+    "TheTime": "timestamp",
+    "O3_1": "O3 (ppm)",
+    "NO": "NO (ppm)",
+    "NO2": "NO2 (ppm)",
+    "NOx": "NOx (ppm)",
+    "ch4": "CH4 (ppmb)",
+    "co2": "CO2 (ppmb)",
+    "co": "CO (ppm)"
+}
