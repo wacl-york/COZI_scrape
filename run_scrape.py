@@ -16,7 +16,7 @@ from google.oauth2 import service_account
 import googleapiclient.discovery
 from googleapiclient.http import MediaIoBaseDownload
 
-LOCAL_DIR = "data"
+LOCAL_DIR = "tmp"
 CREDENTIALS_FN = "credentials.json"
 COLUMNS_FN = "fields.json"
 
@@ -24,11 +24,20 @@ COLUMNS_FN = "fields.json"
 def main():
     args = parse_args()
 
+    # Create local directory to store data
+    if os.path.exists(LOCAL_DIR):
+        print(
+            "Error: '{}' folder exists, please remove it and retry.".format(LOCAL_DIR)
+        )
+        return
+    os.makedirs(LOCAL_DIR)
+
     # Authenticate with Google Drive
     try:
         service = auth_google_api(CREDENTIALS_FN)
     except GoogleAPIError:
         print("Error connecting to service, terminating execution.")
+        cleanup()
         return
 
     # Load field mapping dictionary
@@ -41,11 +50,13 @@ def main():
                 COLUMNS_FN
             )
         )
+        cleanup()
         return
     except json.decoder.JSONDecodeError:
         print(
             "Error: cannot parse {} as JSON, terminating execution.".format(COLUMNS_FN)
         )
+        cleanup()
         return
 
     # Obtain reference to all logging files
@@ -56,13 +67,13 @@ def main():
     )
     items = results.get("files", [])
 
-    # Download files if not present in local cache
+    # Download files
     for item in items:
-        if item["name"] not in os.listdir(LOCAL_DIR):
-            print("Downloading {}...".format(item["name"]))
-            download_file(item["id"], os.path.join(LOCAL_DIR, item["name"]), service)
+        print("Downloading {}...".format(item["name"]))
+        download_file(item["id"], os.path.join(LOCAL_DIR, item["name"]), service)
 
     # Load all data into a single data frame
+    print("Processing data into single file...")
     dfs = []
     for fn in os.listdir(LOCAL_DIR):
         df = load_file(os.path.join(LOCAL_DIR, fn), field_names)
@@ -72,14 +83,36 @@ def main():
         dfs.append(df)
 
     # Combine all clean datasets into 1 frame and convert to long
+    if len(dfs) < 1:
+        print("Error: no clean data loaded, terminating execution")
+        cleanup()
+        return
+
     combined = pd.concat(dfs)
     long_df = wide_to_long(combined)
 
     # Save file
     try:
         long_df.to_csv(args.output)
+        print("Cleaned data saved to {}.".format(args.output))
     except FileNotFoundError:
-        print("Cannot save to '{}'.".format(args.output))
+        print("Cannot save to {}.".format(args.output))
+        cleanup()
+
+    cleanup()
+
+
+def cleanup():
+    """
+    Cleans up the working directory by removing temporary resources.
+
+    Args:
+        None.
+
+    Returns:
+        None, just deletes ancillary files.
+    """
+    shutil.rmtree(LOCAL_DIR)
 
 
 def parse_args():
@@ -207,11 +240,11 @@ def load_file(filename, fields):
         the read is succesful, None otherwise..
     """
     try:
-        df = pd.read_csv(filename, names=fields.keys(), header=0)
+        df = pd.read_csv(filename, usecols=fields.keys(), header=0)
     except pd.errors.EmptyDataError:
         print("{} is empty, skipping contents.".format(filename))
         return None
-    except pd.errors.ParserError as ex:
+    except (pd.errors.ParserError, ValueError) as ex:
         print("Unable to parse {} as CSV, skipping contents.".format(filename))
         return None
 

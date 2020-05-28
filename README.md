@@ -2,8 +2,9 @@
 
 Downloads COZI instrument data from Google Drive and prepares it for analysis.
 
-It keeps a local cache of the raw logging files from Google Drive, which are identified as having a filename starting with _logging_ and being kept in a directory that the Google Service account has access to.
-After downloading any new logging files to the local cache, the program collates all of the data into a single file, subsets it to just those columns of interest, and saves the resultant data as a long CSV file to a specified filename.
+The program firstly downloads the raw logging files from Google Drive into a temporary local folder.
+The logging files identified as those having a filename starting with _logging_ and being stored in a directory that the Google Service account has access to.
+Then, the program collates all of the data into a single data table, subsets it to just those columns of interest, and saves the resultant data as a long CSV file to a specified filename.
 The output CSV has 3 columns:
 
   - `timestamp`: In YYYY-mm-dd HH:MM:SS format
@@ -32,7 +33,6 @@ After setting up the Python dependencies, simply clone this repository, then cre
 The required aspects for deployment are:
   - The `run_scrape.py` script that handles the downloading and processing of the data
   - The `credentials.json` file
-  - The `data` directory to store a local cache of the data
   - The `fields.json` file that describes the mapping between column labels in the raw and output processed data
 
 # Running
