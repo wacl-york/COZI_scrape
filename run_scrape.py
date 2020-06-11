@@ -26,10 +26,7 @@ def main():
 
     # Create local directory to store data
     if os.path.exists(LOCAL_DIR):
-        print(
-            "Error: '{}' folder exists, please remove it and retry.".format(LOCAL_DIR)
-        )
-        return
+        cleanup()
     os.makedirs(LOCAL_DIR)
 
     # Authenticate with Google Drive
