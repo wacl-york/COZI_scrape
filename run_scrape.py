@@ -336,6 +336,25 @@ def load_met_file(filename, fields):
         fields, with the columns set as the attributes if the read is successful,
         None otherwise.
     """
+    degrees_per_point = 360/16
+    compass_map = {"N": degrees_per_point * 0,
+                   "NNE": degrees_per_point * 1,
+                   "NE": degrees_per_point * 2,
+                   "ENE": degrees_per_point * 3,
+                   "E": degrees_per_point * 4,
+                   "ESE": degrees_per_point * 5,
+                   "SE": degrees_per_point * 6,
+                   "SSE": degrees_per_point * 7,
+                   "S": degrees_per_point * 8,
+                   "SSW": degrees_per_point * 9,
+                   "SW": degrees_per_point * 10,
+                   "WSW": degrees_per_point * 11,
+                   "W": degrees_per_point * 12,
+                   "WNW": degrees_per_point * 13,
+                   "NW": degrees_per_point * 14,
+                   "NNW": degrees_per_point * 15,
+                  }
+
     try:
         df = pd.read_csv(
             filename,
@@ -354,6 +373,9 @@ def load_met_file(filename, fields):
 
     # Rename columns to have the specified labels
     df = df.rename(columns=fields)
+
+    # Map compass directions into numerical degrees
+    df["Wind direction"] = df["Wind direction"].map(compass_map)
 
     # Combine date and time into single timestamp column
     df["timestamp"] = df["Date"] + " " + df["Time"]
