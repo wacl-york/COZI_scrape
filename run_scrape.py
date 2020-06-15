@@ -252,6 +252,9 @@ def load_dataset(service, query, load_function, fields, tempdir):
     else:
         long_df = None
 
+    # Remove empty values
+    long_df.dropna(subset=['value'], inplace=True)
+
     return long_df
 
 
@@ -369,7 +372,7 @@ def wide_to_long(data):
         column and at least one other measurement column.
 
     Returns:
-        A pandas.DataFrame object with 3 columns: 
+        A pandas.DataFrame object with 3 columns:
             - timestamp: In YYYY-mm-dd HH:MM:SS format
             - measurand: Name of measurand as human readable string
             - value: Measurement value as float.
