@@ -15,6 +15,9 @@ import pandas as pd
 from google.oauth2 import service_account
 import googleapiclient.discovery
 from googleapiclient.http import MediaIoBaseDownload
+from weatherlink.importer import Importer
+from weatherlink.models import convert_timestamp_to_datetime
+from weatherlink.utils import convert_fahrenheit_to_celsius, convert_miles_per_hour_to_meters_per_second
 
 LOCAL_DIR = "tmp"
 AQ_DIR = os.path.join(LOCAL_DIR, "AQ")
@@ -73,7 +76,7 @@ def main():
 
     # Load both datasets into long data frames
     met_data = load_dataset(
-        service, "name = 'download.txt'", load_met_file, met_fields, MET_DIR
+        service, "name contains '.wlk'", load_met_file, met_fields, MET_DIR
     )
     aq_data = load_dataset(
         service, "name contains 'logging'", load_airquality_file, aq_fields, AQ_DIR
@@ -253,7 +256,8 @@ def load_dataset(service, query, load_function, fields, tempdir):
         long_df = None
 
     # Remove empty values
-    long_df.dropna(subset=['value'], inplace=True)
+    if long_df is not None:
+        long_df.dropna(subset=['value'], inplace=True)
 
     return long_df
 
@@ -336,51 +340,37 @@ def load_met_file(filename, fields):
         fields, with the columns set as the attributes if the read is successful,
         None otherwise.
     """
-    degrees_per_point = 360/16
-    compass_map = {"N": degrees_per_point * 0,
-                   "NNE": degrees_per_point * 1,
-                   "NE": degrees_per_point * 2,
-                   "ENE": degrees_per_point * 3,
-                   "E": degrees_per_point * 4,
-                   "ESE": degrees_per_point * 5,
-                   "SE": degrees_per_point * 6,
-                   "SSE": degrees_per_point * 7,
-                   "S": degrees_per_point * 8,
-                   "SSW": degrees_per_point * 9,
-                   "SW": degrees_per_point * 10,
-                   "WSW": degrees_per_point * 11,
-                   "W": degrees_per_point * 12,
-                   "WNW": degrees_per_point * 13,
-                   "NW": degrees_per_point * 14,
-                   "NNW": degrees_per_point * 15,
-                  }
-
     try:
-        df = pd.read_csv(
-            filename,
-            skiprows=[0, 2],
-            sep=" ",
-            skipinitialspace=True,
-            usecols=fields.keys(),
-            index_col=False,
-        )
+        importer = Importer(filename)
+        importer.import_data()
+    except FileNotFoundError:
+        print("Cannot find file {}.".format(filename))
+        return None
+
+    # Limit fields to those required
+    clean_fields = [{field: row[field] for field in fields.keys()} for row in importer.records]
+
+    # Convert fields to ISO8061/metric
+    for record in clean_fields:
+        if record['timestamp'] is not None:
+            record['timestamp'] = convert_timestamp_to_datetime(record['timestamp'])
+        if record['temperature_outside'] is not None:
+            record['temperature_outside'] = convert_fahrenheit_to_celsius(record['temperature_outside'])
+        if record['wind_speed'] is not None:
+            record['wind_speed'] = convert_miles_per_hour_to_meters_per_second(record['wind_speed'])
+
+    # Parse list of dicts as pandas data frame
+    try:
+        df = pd.DataFrame(clean_fields)
     except pd.errors.EmptyDataError:
         print("{} is empty, skipping contents.".format(filename))
         return None
-    except (pd.errors.ParserError, ValueError) as ex:
+    except (pd.errors.ParserError, ValueError, KeyError) as ex:
         print("Unable to parse {} as CSV, skipping contents.".format(filename))
         return None
 
     # Rename columns to have the specified labels
     df = df.rename(columns=fields)
-
-    # Map compass directions into numerical degrees
-    df["Wind direction"] = df["Wind direction"].map(compass_map)
-
-    # Combine date and time into single timestamp column
-    df["timestamp"] = df["Date"] + " " + df["Time"]
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
-    df = df.drop(["Date", "Time"], axis=1)
 
     return df
 

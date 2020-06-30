@@ -10,11 +10,10 @@
         "co": "CO (ppbV)"
     },
     "meteorological": {
-        "Date": "Date",
-        "Time": "Time",
-        "Out": "Temperature (°C)",
-        "Hum": "Relative humidity (%)",
-        "Speed": "Wind speed (ms¹)",
-        "Dir": "Wind direction"
+        "timestamp": "timestamp",
+        "temperature_outside": "Temperature (°C)",
+        "humidity_outside": "Relative humidity (%)",
+        "wind_speed": "Wind speed (ms¹)",
+        "wind_direction_prevailing_degrees": "Wind direction"
     }
 }
