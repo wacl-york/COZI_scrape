@@ -91,10 +91,10 @@ def main():
         cleanup()
         return
 
-    # Combined into a single data frame and save to CSV
-    long_df = pd.concat((met_data, aq_data))
+    # Combine into a data frame and save to file
+    combined = pd.merge(met_data, aq_data, on="timestamp", how="outer")
     try:
-        long_df.to_csv(args.output)
+        combined.to_csv(args.output, index=False)
         print("Cleaned data saved to {}.".format(args.output))
     except FileNotFoundError:
         print("Cannot save to {}.".format(args.output))
@@ -248,18 +248,14 @@ def load_dataset(service, query, load_function, fields, tempdir):
 
         dfs.append(df)
 
-    # Combine all clean datasets into 1 frame and convert to long
+    # Combine all clean datasets into 1 frame and drop empty values
     if len(dfs) >= 1:
         combined = pd.concat(dfs)
-        long_df = wide_to_long(combined)
+        combined.dropna(inplace=True)
     else:
-        long_df = None
+        combined = None
 
-    # Remove empty values
-    if long_df is not None:
-        long_df.dropna(subset=['value'], inplace=True)
-
-    return long_df
+    return combined
 
 
 def download_file(file_id, filename, service):
