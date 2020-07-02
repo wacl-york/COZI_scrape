@@ -1,10 +1,19 @@
 {
-    "TheTime": "timestamp",
-    "O3_1": "O3 (ppbV)",
-    "NO": "NO (ppbV)",
-    "NO2": "NO2 (ppbV)",
-    "NOx": "NOx (ppbV)",
-    "ch4": "CH4 (ppmV)",
-    "co2": "CO2 (ppmV)",
-    "co": "CO (ppbV)"
+    "airquality": {
+        "TheTime": "timestamp",
+        "O3_1": "O3 (ppbV)",
+        "NO": "NO (ppbV)",
+        "NO2": "NO2 (ppbV)",
+        "NOx": "NOx (ppbV)",
+        "ch4": "CH4 (ppmV)",
+        "co2": "CO2 (ppmV)",
+        "co": "CO (ppbV)"
+    },
+    "meteorological": {
+        "timestamp": "timestamp",
+        "temperature_outside": "Temperature (°C)",
+        "humidity_outside": "Relative humidity (%)",
+        "wind_speed": "Wind speed (ms¹)",
+        "wind_direction_prevailing_degrees": "Wind direction"
+    }
 }
