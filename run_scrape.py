@@ -251,7 +251,7 @@ def load_dataset(service, query, load_function, fields, tempdir):
     # Combine all clean datasets into 1 frame and drop empty values
     if len(dfs) >= 1:
         combined = pd.concat(dfs)
-        combined.dropna(inplace=True)
+        combined.dropna(inplace=True, how='all')
     else:
         combined = None
 
