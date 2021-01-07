@@ -348,7 +348,8 @@ def load_met_file(filename, fields):
     # Limit fields to those required
     clean_fields = [{field: row[field] for field in fields.keys()} for row in importer.records]
 
-    # Convert fields to ISO8061/metric
+    # Convert fields to ISO8061/metric. These weatherlink conversion functions
+    # aren't vectorised
     for record in clean_fields:
         if record['timestamp'] is not None:
             record['timestamp'] = convert_timestamp_to_datetime(record['timestamp'])
@@ -398,6 +399,14 @@ def clean(df):
     for col in thresholds:
         df.loc[df[col] <= thresholds[col]["lower"], col] = np.NaN
         df.loc[df[col] >= thresholds[col]["upper"], col] = np.NaN
+
+    # Set all columns except timestamp as float
+    types = {k: 'float64' for k in df.columns}
+    types['timestamp'] = 'datetime64[ns]'
+    df = df.astype(types)
+
+    # Resample to 1 minute average
+    df = df.set_index('timestamp').resample("1 Min").mean().reset_index()
 
     return df
 
