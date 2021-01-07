@@ -12,6 +12,7 @@ import os
 import io
 import json
 import pandas as pd
+import numpy as np
 from google.oauth2 import service_account
 import googleapiclient.discovery
 from googleapiclient.http import MediaIoBaseDownload
@@ -91,8 +92,9 @@ def main():
         cleanup()
         return
 
-    # Combine into a data frame and save to file
+    # Combine into a data frame, clean, and save to file
     combined = pd.merge(met_data, aq_data, on="timestamp", how="outer")
+    combined = clean(combined)
     try:
         combined.to_csv(args.output, index=False)
         print("Cleaned data saved to {}.".format(args.output))
@@ -371,25 +373,33 @@ def load_met_file(filename, fields):
     return df
 
 
-def wide_to_long(data):
+def clean(df):
     """
-    Converts wide dataframe into long.
+    Cleans the final data frame.
+
+    Currently this just removes values outside of hardcoded limits.
 
     Args:
-        - data (pandas.DataFrame): Wide dataframe with a 'timestamp'
-        column and at least one other measurement column.
+        - df (pd.DataFrame): The input data frame.
 
     Returns:
-        A pandas.DataFrame object with 3 columns:
-            - timestamp: In YYYY-mm-dd HH:MM:SS format
-            - measurand: Name of measurand as human readable string
-            - value: Measurement value as float.
+        A pd.DataFrame.
     """
-    # Convert to long
-    long = data.melt(id_vars="timestamp", var_name="measurand", value_name="value")
-    long = long.set_index("timestamp")
+    thresholds = {
+        "Temperature (°C)": {
+            "lower": -1000,
+            "upper": np.Inf
+        },
+        "Relative humidity (%)": {
+            "lower": -1000,
+            "upper": np.Inf
+        }
+    }
+    for col in thresholds:
+        df.loc[df[col] <= thresholds[col]["lower"], col] = np.NaN
+        df.loc[df[col] >= thresholds[col]["upper"], col] = np.NaN
 
-    return long
+    return df
 
 
 if __name__ == "__main__":
