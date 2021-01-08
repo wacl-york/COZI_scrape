@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     updater.py
     ~~~~~~~~~~
@@ -46,7 +47,7 @@ def main():
 
     # Load field mapping dictionary
     try:
-        with open(COLUMNS_FN, "r") as infile:
+        with open(COLUMNS_FN, "r", encoding='utf8') as infile:
             field_names = json.load(infile)
     except FileNotFoundError:
         print(
