@@ -266,8 +266,32 @@ def clean(df):
             "upper": np.Inf
         },
         "Relative humidity (%)": {
-            "lower": -1000,
+            "lower": 0,
             "upper": np.Inf
+        },
+        "NO (ppbV)": {
+            "lower": 0,
+            "upper": 200
+        },
+        "NO2 (ppbV)": {
+            "lower": 0,
+            "upper": 200
+        },
+        "NOx (ppbV)": {
+            "lower": 0,
+            "upper": 200
+        },
+        "CO (ppbV)": {
+            "lower": 0,
+            "upper": 400
+        },
+        "CO2 (ppmV)": {
+            "lower": 0,
+            "upper": 550
+        },
+        "CH4 (ppmV)": {
+            "lower": 0,
+            "upper": 100
         }
     }
     for col in thresholds:
@@ -281,6 +305,9 @@ def clean(df):
 
     # Resample to 1 minute average
     df = df.set_index('timestamp').resample("1 Min").mean().reset_index()
+
+    # Remove March 2021 CH4 and C0
+    df.loc[(df['timestamp'] >= "2021-02-15") & (df['timestamp'] < "2021-04-01"), ["CH4 (ppmV)", "CO2 (ppmV)"]] = np.nan
 
     return df
 
