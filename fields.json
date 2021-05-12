@@ -11,9 +11,9 @@
     },
     "meteorological": {
         "timestamp": "timestamp",
-        "temperature_outside": "Temperature (°C)",
+        "temperature_outside": "Temperature (C)",
         "humidity_outside": "Relative humidity (%)",
-        "wind_speed": "Wind speed (ms¹)",
+        "wind_speed": "Wind speed (ms-1)",
         "wind_direction_prevailing_degrees": "Wind direction"
     }
 }

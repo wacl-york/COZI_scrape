@@ -264,7 +264,7 @@ def clean(df):
         A pd.DataFrame.
     """
     thresholds = {
-        "Temperature (°C)": {
+        "Temperature (C)": {
             "lower": -1000,
             "upper": np.Inf
         },
