@@ -218,6 +218,9 @@ def load_met_file(filename, fields):
     except FileNotFoundError:
         print("Cannot find file {}.".format(filename))
         return None
+    except ValueError:
+        print("Cannot read file {}.".format(filename))
+        return None
 
     # Limit fields to those required
     clean_fields = [{field: row[field] for field in fields.keys()} for row in importer.records]
