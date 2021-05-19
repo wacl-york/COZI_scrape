@@ -7,7 +7,7 @@ rclone --config rclone.conf --include *.wlk -v --drive-shared-with-me sync CoziD
 rclone --config rclone.conf --include logging* -v --drive-shared-with-me sync CoziDrive:COZI_DATA raw_data/AQ
 
 # Pre-processes it into a single CSV
-/.conda/envs/coziscrape/bin/python run_scrape.py clean_data/cozi_data.csv
+~/.conda/envs/coziscrape/bin/python run_scrape.py clean_data/cozi_data.csv
 
 # Uploads for Shiny
 cp clean_data/cozi_data.csv /shared/storage/shiny0/cozi/data.csv
