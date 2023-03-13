@@ -12,4 +12,4 @@ rclone --config rclone.conf --include cozi_all_data_* -v --drive-shared-with-me 
 # Uploads for Shiny
 cp clean_data/cozi_data.csv /shared/storage/shiny0/cozi/data.csv
 # Uploads for Grafana
-rclone --config rclone.conf --include cozi_data.csv -v --drive-shared-with-me sync clean_data CoziDrive:COZIDataForGrafana
+rclone --config rclone.conf --include cozi_data.csv -v --drive-shared-with-me copy clean_data CoziDrive:COZIDataForGrafana
