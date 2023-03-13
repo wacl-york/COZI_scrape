@@ -1,8 +1,8 @@
 {
     "airquality": {
         "TheTime": "timestamp",
-		"thermo42C_42CTL60720328_NO": "NO (ppbV)",
-		"t500u_021732_NO2": "NO2 (ppbV)"
+        "thermo42C_42CTL60720328_NO": "NO (ppbV)",
+        "t500u_021732_NO2": "NO2 (ppbV)"
     },
     "meteorological": {
         "timestamp": "timestamp",
