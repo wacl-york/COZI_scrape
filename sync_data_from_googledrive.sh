@@ -4,7 +4,7 @@ cd ~/WACL/COZI_scrape
 
 # Downloads latest raw data
 rclone --config rclone.conf --include *.wlk -v --drive-shared-with-me sync CoziDrive:WACLroof raw_data/MET
-rclone --config rclone.conf --include logging_1min_* -v --drive-shared-with-me sync CoziDrive:COZI_DATA raw_data/AQ
+rclone --config rclone.conf --include cozi_all_data_* -v --drive-shared-with-me sync CoziDrive:COZI_DATA raw_data/AQ
 
 # Pre-processes it into a single CSV
 ~/.conda/envs/coziscrape/bin/python run_scrape.py clean_data/cozi_data.csv
