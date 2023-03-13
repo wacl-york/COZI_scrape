@@ -188,8 +188,8 @@ def load_airquality_file(filename, fields):
 
     # Rename columns to have the specified labels
     df = df.rename(columns=fields)
-    # Convert Excel timestamp into ISO
-    df["timestamp"] = convert_excel_time(df["timestamp"])
+    # Parse timestamp (it's in mm/dd/YY HH:MM:SS)
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
 
     return df
 
@@ -298,8 +298,9 @@ def clean(df):
         }
     }
     for col in thresholds:
-        df.loc[df[col] <= thresholds[col]["lower"], col] = np.NaN
-        df.loc[df[col] >= thresholds[col]["upper"], col] = np.NaN
+        if col in df.columns:
+            df.loc[df[col] <= thresholds[col]["lower"], col] = np.NaN
+            df.loc[df[col] >= thresholds[col]["upper"], col] = np.NaN
 
     # Set all columns except timestamp as float
     types = {k: 'float64' for k in df.columns}
@@ -310,7 +311,8 @@ def clean(df):
     df = df.set_index('timestamp').resample("1 Min").mean().reset_index()
 
     # Remove March 2021 CH4 and C0
-    df.loc[(df['timestamp'] >= "2021-02-15") & (df['timestamp'] < "2021-04-01"), ["CH4 (ppmV)", "CO2 (ppmV)"]] = np.nan
+    if 'CH4 (ppmV)' in df.columns and 'CO2 (ppmV)' in df.columns:
+        df.loc[(df['timestamp'] >= "2021-02-15") & (df['timestamp'] < "2021-04-01"), ["CH4 (ppmV)", "CO2 (ppmV)"]] = np.nan
 
     return df
 
